@@ -3,16 +3,12 @@ public final class A {
 
     private final C c;
 
-    private A(
-            java.util.function.Consumer<A> $lombokIncompletePublisher,
-            java.util.function.Supplier<? extends B> b,
-            java.util.function.Supplier<? extends C> c)
-    {
-        if (b == null) throw new NullPointerException("b");
-        if (c == null) throw new NullPointerException("c");
-        $lombokIncompletePublisher.accept(this);
-        this.b = b.get();
-        this.c = c.get();
+    private A(ABuilder $lombokTemp0) {
+        if ($lombokTemp0.b == null) throw new NullPointerException("b");
+        if ($lombokTemp0.c == null) throw new NullPointerException("c");
+        $lombokTemp0.$lombokLastInstance = this;
+        this.b = $lombokTemp0.b.getOrBuild();
+        this.c = $lombokTemp0.c.getOrBuild();
     }
 
     public B getB() {
@@ -27,43 +23,64 @@ public final class A {
         return new ABuilder();
     }
 
+    public ABuilderFactoryInterface $lombokHold() {
+        return new ABuilderFactoryInterface() {
+            @Override
+            public A getOrBuild() {
+                return A.this;
+            }
+        };
+    }
+
     // equals(Object), hashCode() and toString() methods ommited.
 
-    public static final class ABuilder {
-        private java.util.function.Supplier<? extends B> b;
-        private java.util.function.Supplier<? extends C> c;
+    public static final class ABuilder implements ABuilderFactoryInterface {
+        private B.BBuilderFactoryInterface b;
+        private C.CBuilderFactoryInterface c;
+        private A $lombokLastInstance;
 
         private ABuilder() {
         }
 
         public ABuilder b(B b) {
-            this.b = () -> b;
+            $lombokLastInstance = null;
+            this.b = b.$lombokHold();
             return this;
         }
 
-        public ABuilder b(java.util.function.Supplier<? extends B> b) {
+        public ABuilder b(B.BBuilder b) {
+            $lombokLastInstance = null;
             this.b = b;
             return this;
         }
 
         public ABuilder c(C c) {
-            this.c = () -> c;
+            $lombokLastInstance = null;
+            this.c = c.$lombokHold();
             return this;
         }
 
-        public ABuilder suppliedC(java.util.function.Supplier<? extends C> c) {
+        public ABuilder suppliedC(C.CBuilder c) {
+            $lombokLastInstance = null;
             this.c = c;
             return this;
         }
 
         public A build() {
-            return build($lombokDummy -> {});
+            $lombokLastInstance = new A(this);
+            return $lombokLastInstance;
         }
 
-        public A build(java.util.function.Consumer<A> $lombokIncompletePublisher) {
-            return new A($lombokIncompletePublisher, this.b, this.c);
+        @Override
+        public A getOrBuild() {
+            if ($lombokLastInstance == null) build();
+            return $lombokLastInstance;
         }
 
         // toString() method ommited.
+    }
+
+    public static interface ABuilderFactoryInterface {
+        public A getOrBuild();
     }
 }

@@ -1,5 +1,3 @@
-import java.util.function.Supplier;
-
 public class Test {
     public static void main(String[] args) {
         // 1. Declare all the builders.
@@ -9,28 +7,21 @@ public class Test {
         B.BBuilder builderB2 = B.builder();
         C.CBuilder builderC = C.builder();
 
-        // 2. Get the cached suppliers.
-        Supplier<A> sa1 = Cached.cache(builderA1::build);
-        Supplier<A> sa2 = Cached.cache(builderA2::build);
-        Supplier<B> sb1 = Cached.cache(builderB1::build);
-        Supplier<B> sb2 = Cached.cache(builderB2::build);
-        Supplier<C> sc = Cached.cache(builderC::build);
+        // 2. Populate all the builders.
+        builderA1.b(builderB1).suppliedC(builderC);
+        builderA2.b(builderB2).suppliedC(builderC);
+        builderB1.a(builderA2).c(builderC).d("Cupcake");
+        builderB2.a(builderA1).c(builderC).d("Brownie");
+        builderC.a(builderA1).a(builderA2).b1(builderB1).b2(builderB2);
 
-        // 3. Populate all the builders
-        builderA1.b(sb1).suppliedC(sc);
-        builderA2.b(sb2).suppliedC(sc);
-        builderB1.a(sa2).c(sc).d("Cupcake");
-        builderB2.a(sa1).c(sc).d("Brownie");
-        builderC.a(sa1).a(sa2).b1(sb1).b2(sb2);
+        // 3. Produce the objects.
+        A a1 = builderA1.getOrBuild();
+        A a2 = builderA2.getOrBuild();
+        B b1 = builderB1.getOrBuild();
+        B b2 = builderB2.getOrBuild();
+        C c = builderC.getOrBuild();
 
-        // 4. Produce the objects.
-        A a1 = sa1.get();
-        A a2 = sa2.get();
-        B b1 = sb1.get();
-        B b2 = sb2.get();
-        C c = sc.get();
-
-        // 5. Assert that the objects are what we wanted.
+        // 4. Assert that the objects are what we wanted.
         if (a1.getB() != b1) throw new AssertionError();
         if (a2.getB() != b2) throw new AssertionError();
         if (b1.getA() != a2) throw new AssertionError();
@@ -58,5 +49,18 @@ public class Test {
         } catch (UnsupportedOperationException expected) {
             // Swallow it.
         }
+
+        // 4. Assert that the builders have expected side-effects if reused.
+        B b3 = builderB1.getOrBuild();
+        if (b3 != b1) throw new AssertionError();
+        builderB1.d("Strawberry");
+        B b4 = builderB1.getOrBuild();
+        if (b1 == b4) throw new AssertionError();
+        B b5 = builderB1.getOrBuild();
+        if (b5 != b4) throw new AssertionError();
+        B b6 = builderB1.build();
+        if (b6 == b4) throw new AssertionError();
+        B b7 = builderB1.build();
+        if (b7 == b6) throw new AssertionError();
     }
 }
